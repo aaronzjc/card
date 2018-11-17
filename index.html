@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
+    <script type="text/javascript" src="https://vuejs.org/js/vue.js"></script>
+    <title>测试</title>
+</head>
+
+<body>
+    <!-- Tabs模块 -->
+    <template id="VTabs">
+        <div class="tabs">
+            <ul>
+                <li 
+                    v-for="(item, index) in items" 
+                    :class="{ 'is-active': index == active }"
+                    @click="switchTab(index)" >
+                    <a>{{ item }}</a>
+                </li>
+                <li><a class="button is-primary">添加</a></li>
+            </ul>
+        </div>
+    </template>
+    
+    <!-- 添加模块 -->
+    <template id="VAct">
+        <div class="columns">
+            <div class="column">
+                <div class="dropdown" :class="{ 'is-active': open }">
+                    <div class="dropdown-trigger">
+                        <button @click="switchDropdown" class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+                            <span>添加模块</span>
+                            <span class="icon is-small">
+                                <i class="fas fa-angle-down" aria-hidden="true"></i>
+                            </span>
+                        </button>
+                    </div>
+                    <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                        <div class="dropdown-content">
+                            <a href="#" class="dropdown-item" @click="chooseModule('basic')">
+                            基础信息模块
+                            </a>
+                            <a class="dropdown-item" @click="chooseModule('bussiness')">
+                            双图商业化模块
+                            </a>
+                            <a href="#" class="dropdown-item" @click="chooseModule('userlist')">
+                            用户列表模块
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <!-- 基础信息模块 -->
+    <template id="VModuleBasic">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">
+                    {{ info.title }}
+                </p>
+                <a href="#" class="card-header-icon" aria-label="more options">
+                    <span class="icon">
+                        <i class="fas fa-angle-down" aria-hidden="true"></i>
+                    </span>
+                </a>
+            </header>
+            <div class="card-content">
+                <div class="columns">
+                    <div class="column is-two-fifths">
+                        <div class="field is-horizontal">
+                            <div class="field-label is-normal">
+                                <label class="label">标题文案</label>
+                            </div>
+                            <div class="field-body">
+                                <div class="field">
+                                    <p class="control">
+                                        <input class="input" v-model="info.title" type="email" placeholder="标题文案">
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column is-two-fifths">
+                        <div class="field is-horizontal">
+                            <div class="field-label is-normal">
+                                <label class="label">跳转地址</label>
+                            </div>
+                            <div class="field-body">
+                                <div class="field">
+                                    <p class="control">
+                                        <input class="input" v-model="info.url" type="email" placeholder="跳转链接">
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <table class="table is-bordered is-fullwidth" v-for="(item, index) in info.items">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>标题文案</th>
+                            <th>描述文案</th>
+                            <th>封面图</th>
+                            <th>微博地址</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td rowspan="{{ info.items.data.length }}" style="vertical-align: middle;text-align: center;">{{ info.items.id }}</td>
+                            <td><input type="text" class="input is-small" name=""></td>
+                            <td><input type="text" class="input is-small" name=""></td>
+                            <td><input type="text" class="input is-small" name=""></td>
+                            <td>http://www.baidu.com</td>
+                            <td rowspan="3" style="vertical-align: middle;text-align: center;">
+                                <a class="button is-primary is-small">添加</a>
+                                <a class="button is-danger is-small">删除</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" class="input is-small" name=""></td>
+                            <td><input type="text" class="input is-small" name=""></td>
+                            <td><input type="text" class="input is-small" name=""></td>
+                            <td>http://www.baidu.com</td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" class="input is-small" name=""></td>
+                            <td><input type="text" class="input is-small" name=""></td>
+                            <td><input type="text" class="input is-small" name=""></td>
+                            <td>http://www.baidu.com</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </template>
+
+    <section id="app">
+
+        <div class="container">
+            <v-tabs :items="page_tabs.items" :active="page_tabs.active"></v-tabs>
+
+            <v-act :open="page_action.open"></v-act>
+
+            <div class="card">
+                <header class="card-header">
+                    <p class="card-header-title">
+                        基础模块
+                    </p>
+                    <a href="#" class="card-header-icon" aria-label="more options">
+                        <span class="icon">
+                            <i class="fas fa-angle-down" aria-hidden="true"></i>
+                        </span>
+                    </a>
+                </header>
+                <div class="card-content">
+                    <div class="columns">
+                        <div class="column is-two-fifths">
+                            <div class="field is-horizontal">
+                                <div class="field-label is-normal">
+                                    <label class="label">标题文案</label>
+                                </div>
+                                <div class="field-body">
+                                    <div class="field">
+                                        <p class="control">
+                                            <input class="input" type="email" placeholder="Recipient email">
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column is-two-fifths">
+                            <div class="field is-horizontal">
+                                <div class="field-label is-normal">
+                                    <label class="label">跳转地址</label>
+                                </div>
+                                <div class="field-body">
+                                    <div class="field">
+                                        <p class="control">
+                                            <input class="input" type="email" placeholder="Recipient email">
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table is-bordered is-fullwidth">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>标题文案</th>
+                                <th>描述文案</th>
+                                <th>封面图</th>
+                                <th>微博地址</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td rowspan="3" style="vertical-align: middle;text-align: center;">123</td>
+                                <td><input type="text" class="input is-small" name=""></td>
+                                <td><input type="text" class="input is-small" name=""></td>
+                                <td><input type="text" class="input is-small" name=""></td>
+                                <td>http://www.baidu.com</td>
+                                <td rowspan="3" style="vertical-align: middle;text-align: center;">
+                                    <a class="button is-primary is-small">添加</a>
+                                    <a class="button is-danger is-small">删除</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" class="input is-small" name=""></td>
+                                <td><input type="text" class="input is-small" name=""></td>
+                                <td><input type="text" class="input is-small" name=""></td>
+                                <td>http://www.baidu.com</td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" class="input is-small" name=""></td>
+                                <td><input type="text" class="input is-small" name=""></td>
+                                <td><input type="text" class="input is-small" name=""></td>
+                                <td>http://www.baidu.com</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+        </div>
+    </section>
+
+    <script type="text/javascript">
+    var store = {
+        state: {
+            "basic_info": {},
+            "page_tabs": {
+                "active": 0,
+                "items": ["第一页", "第二页", "第三页"]
+            },
+            "page_action": {
+                "open": false
+            },
+            "page_modules": [
+                {
+                    "id": 1,
+                    "title": "基础模块",
+                    "url": "http://www.baidu.com",
+                    "state": {
+                        "count": 0,
+                    },
+                    "items": [
+                        {
+                            "id": 1,
+                            "data": [
+                                {
+                                    "title": "示例",
+                                    "desc": "描述",
+                                    "pic": "123123123"
+                                    "url": "#sinaweibo",
+                                },
+                                {
+                                    "title": "示例",
+                                    "desc": "描述",
+                                    "pic": "123123123"
+                                    "url": "#sinaweibo",
+                                },
+                                {
+                                    "title": "示例",
+                                    "desc": "描述",
+                                    "pic": "123123123"
+                                    "url": "#sinaweibo",
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+
+        switchTab: function(idx) {
+            this.state.page_tabs.active = idx;
+        },
+
+        switchDropdown: function (st) {
+            this.state.page_action.open = st;
+        },
+
+
+    };
+
+    Vue.component("v-tabs", {
+        template: "#VTabs",
+        props: ["items", "active"],
+        methods: {
+            switchTab: function (idx) {
+                store.switchTab(idx);
+            }
+        }
+    });
+
+    Vue.component("v-act", {
+        template: "#VAct",
+        props: ["open"],
+        methods: {
+            switchDropdown: function () {
+                store.switchDropdown(!this.open);
+            },
+            chooseModule: function (module) {
+                console.log(module);
+                store.switchDropdown(false);
+            }
+        }
+    });
+
+    Vue.component("v-module-basic", {
+        template: "#VModuleBasic",
+        props: [],
+        methods: {
+
+        }
+    });
+
+    var vm = new Vue({
+        el: "#app",
+        data: store.state,
+    });
+    </script>
+</body>
+
+</html>
