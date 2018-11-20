@@ -8,7 +8,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
     <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
     <script type="text/javascript" src="https://vuejs.org/js/vue.js"></script>
+    
+    <script src="http://cdn.jsdelivr.net/npm/sortablejs@1.7.0/Sortable.min.js"></script>
+    <!-- CDNJS :: Vue.Draggable (https://cdnjs.com/) -->
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.15.0/vuedraggable.min.js"></script>
+
     <title>测试</title>
+    <style type="text/css">
+    .card {
+        margin: 10px 0px;
+    }
+    </style>
 </head>
 
 <body>
@@ -31,7 +41,7 @@
     <template id="VAct">
         <div class="columns">
             <div class="column">
-                <div class="dropdown" :class="{ 'is-active': open }">
+                <div class="dropdown" :class="{ 'is-active': actions.open }">
                     <div class="dropdown-trigger">
                         <button @click="switchDropdown" class="button" aria-haspopup="true" aria-controls="dropdown-menu">
                             <span>添加模块</span>
@@ -42,7 +52,7 @@
                     </div>
                     <div class="dropdown-menu" id="dropdown-menu" role="menu">
                         <div class="dropdown-content">
-                            <a href="#" class="dropdown-item" @click="chooseModule('basic')">
+                            <a href="#" class="dropdown-item" @click="chooseModule('basic_module')">
                             基础信息模块
                             </a>
                             <a class="dropdown-item" @click="chooseModule('bussiness')">
@@ -54,6 +64,7 @@
                         </div>
                     </div>
                 </div>
+                <button class="button" @click="openAll">{{ actions.collapse_all ? "展开全部":"折叠全部" }}</button>
             </div>
         </div>
     </template>
@@ -63,15 +74,18 @@
         <div class="card">
             <header class="card-header">
                 <p class="card-header-title">
-                    {{ info.title }}
+                    {{ info.data.title }}
                 </p>
                 <a href="#" class="card-header-icon" aria-label="more options">
-                    <span class="icon">
-                        <i class="fas fa-angle-down" aria-hidden="true"></i>
+                    <span class="icon" @click="info.state.collapse = !info.state.collapse" v-show="!info.state.collapse">
+                        <i class="fa fa-angle-down" aria-hidden="true"></i>
+                    </span>
+                    <span class="icon" @click="info.state.collapse = !info.state.collapse" v-show="info.state.collapse">
+                        <i class="fa fa-angle-up" aria-hidden="true"></i>
                     </span>
                 </a>
             </header>
-            <div class="card-content">
+            <div class="card-content" v-show="!info.state.collapse">
                 <div class="columns">
                     <div class="column is-two-fifths">
                         <div class="field is-horizontal">
@@ -81,7 +95,7 @@
                             <div class="field-body">
                                 <div class="field">
                                     <p class="control">
-                                        <input class="input" v-model="info.title" type="email" placeholder="标题文案">
+                                        <input class="input" v-model="info.data.title" type="email" placeholder="标题文案">
                                     </p>
                                 </div>
                             </div>
@@ -95,50 +109,13 @@
                             <div class="field-body">
                                 <div class="field">
                                     <p class="control">
-                                        <input class="input" v-model="info.url" type="email" placeholder="跳转链接">
+                                        <input class="input" v-model="info.data.url" type="email" placeholder="跳转链接">
                                     </p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <table class="table is-bordered is-fullwidth" v-for="(item, index) in info.items">
-                    <thead>
-                        <tr>
-                            <th>序号</th>
-                            <th>标题文案</th>
-                            <th>描述文案</th>
-                            <th>封面图</th>
-                            <th>微博地址</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td rowspan="{{ info.items.data.length }}" style="vertical-align: middle;text-align: center;">{{ info.items.id }}</td>
-                            <td><input type="text" class="input is-small" name=""></td>
-                            <td><input type="text" class="input is-small" name=""></td>
-                            <td><input type="text" class="input is-small" name=""></td>
-                            <td>http://www.baidu.com</td>
-                            <td rowspan="3" style="vertical-align: middle;text-align: center;">
-                                <a class="button is-primary is-small">添加</a>
-                                <a class="button is-danger is-small">删除</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><input type="text" class="input is-small" name=""></td>
-                            <td><input type="text" class="input is-small" name=""></td>
-                            <td><input type="text" class="input is-small" name=""></td>
-                            <td>http://www.baidu.com</td>
-                        </tr>
-                        <tr>
-                            <td><input type="text" class="input is-small" name=""></td>
-                            <td><input type="text" class="input is-small" name=""></td>
-                            <td><input type="text" class="input is-small" name=""></td>
-                            <td>http://www.baidu.com</td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
         </div>
     </template>
@@ -148,95 +125,35 @@
         <div class="container">
             <v-tabs :items="page_tabs.items" :active="page_tabs.active"></v-tabs>
 
-            <v-act :open="page_action.open"></v-act>
+            <v-act :actions="page_action"></v-act>
 
-            <div class="card">
-                <header class="card-header">
-                    <p class="card-header-title">
-                        基础模块
-                    </p>
-                    <a href="#" class="card-header-icon" aria-label="more options">
-                        <span class="icon">
-                            <i class="fas fa-angle-down" aria-hidden="true"></i>
-                        </span>
-                    </a>
-                </header>
-                <div class="card-content">
-                    <div class="columns">
-                        <div class="column is-two-fifths">
-                            <div class="field is-horizontal">
-                                <div class="field-label is-normal">
-                                    <label class="label">标题文案</label>
-                                </div>
-                                <div class="field-body">
-                                    <div class="field">
-                                        <p class="control">
-                                            <input class="input" type="email" placeholder="Recipient email">
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="column is-two-fifths">
-                            <div class="field is-horizontal">
-                                <div class="field-label is-normal">
-                                    <label class="label">跳转地址</label>
-                                </div>
-                                <div class="field-body">
-                                    <div class="field">
-                                        <p class="control">
-                                            <input class="input" type="email" placeholder="Recipient email">
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <table class="table is-bordered is-fullwidth">
-                        <thead>
-                            <tr>
-                                <th>序号</th>
-                                <th>标题文案</th>
-                                <th>描述文案</th>
-                                <th>封面图</th>
-                                <th>微博地址</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td rowspan="3" style="vertical-align: middle;text-align: center;">123</td>
-                                <td><input type="text" class="input is-small" name=""></td>
-                                <td><input type="text" class="input is-small" name=""></td>
-                                <td><input type="text" class="input is-small" name=""></td>
-                                <td>http://www.baidu.com</td>
-                                <td rowspan="3" style="vertical-align: middle;text-align: center;">
-                                    <a class="button is-primary is-small">添加</a>
-                                    <a class="button is-danger is-small">删除</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><input type="text" class="input is-small" name=""></td>
-                                <td><input type="text" class="input is-small" name=""></td>
-                                <td><input type="text" class="input is-small" name=""></td>
-                                <td>http://www.baidu.com</td>
-                            </tr>
-                            <tr>
-                                <td><input type="text" class="input is-small" name=""></td>
-                                <td><input type="text" class="input is-small" name=""></td>
-                                <td><input type="text" class="input is-small" name=""></td>
-                                <td>http://www.baidu.com</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-
+            <draggable v-model="page_modules" :options="{group:'mms'}" @start="drag=true" @end="drag=false">
+                <component 
+                    :info="module" 
+                    v-for="(module, index) in page_modules" 
+                    :is="module.module_type" 
+                    :key="module.id"
+                    >    
+                </component>
+            </draggable>
         </div>
     </section>
 
     <script type="text/javascript">
+    var tpl = {
+        "basic_module": {
+            "id": null,
+            "module_type": "v-module-basic",
+            "data": {
+                "title": "基础模块",
+                "url": "http://www.baidu.com",
+            },
+            "state": {
+                "collapse": false
+            }
+        }
+    };
+
     var store = {
         state: {
             "basic_info": {},
@@ -245,41 +162,20 @@
                 "items": ["第一页", "第二页", "第三页"]
             },
             "page_action": {
-                "open": false
+                "open": false,
+                "collapse_all": false
             },
             "page_modules": [
                 {
                     "id": 1,
-                    "title": "基础模块",
-                    "url": "http://www.baidu.com",
-                    "state": {
-                        "count": 0,
+                    "module_type": "v-module-basic",
+                    "data": {
+                        "title": "基础模块",
+                        "url": "http://www.baidu.com",
                     },
-                    "items": [
-                        {
-                            "id": 1,
-                            "data": [
-                                {
-                                    "title": "示例",
-                                    "desc": "描述",
-                                    "pic": "123123123"
-                                    "url": "#sinaweibo",
-                                },
-                                {
-                                    "title": "示例",
-                                    "desc": "描述",
-                                    "pic": "123123123"
-                                    "url": "#sinaweibo",
-                                },
-                                {
-                                    "title": "示例",
-                                    "desc": "描述",
-                                    "pic": "123123123"
-                                    "url": "#sinaweibo",
-                                }
-                            ]
-                        }
-                    ]
+                    "state": {
+                        "collapse": false
+                    }
                 }
             ]
         },
@@ -292,6 +188,21 @@
             this.state.page_action.open = st;
         },
 
+        openAll: function () {
+            var i = 0;
+            this.state.page_action.collapse_all = !this.state.page_action.collapse_all;
+            for (;i<this.state.page_modules.length;i++) {
+                this.state.page_modules[i].state.collapse = this.state.page_action.collapse_all;
+            }
+        },
+
+        addModule: function (module) {
+            if (tpl[module]) {
+                var obj = JSON.parse(JSON.stringify(tpl[module]));
+                obj["id"] = this.state.page_modules + 1;
+                this.state.page_modules.push(obj);
+            }
+        }
 
     };
 
@@ -307,7 +218,7 @@
 
     Vue.component("v-act", {
         template: "#VAct",
-        props: ["open"],
+        props: ["actions"],
         methods: {
             switchDropdown: function () {
                 store.switchDropdown(!this.open);
@@ -315,13 +226,18 @@
             chooseModule: function (module) {
                 console.log(module);
                 store.switchDropdown(false);
+                store.addModule(module);
+
+            },
+            openAll: function () {
+                store.openAll();
             }
         }
     });
 
     Vue.component("v-module-basic", {
         template: "#VModuleBasic",
-        props: [],
+        props: ["info"],
         methods: {
 
         }
@@ -329,7 +245,7 @@
 
     var vm = new Vue({
         el: "#app",
-        data: store.state,
+        data: store.state
     });
     </script>
 </body>
