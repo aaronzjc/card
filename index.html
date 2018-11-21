@@ -27,30 +27,6 @@
         cursor: move;
     }
 
-    .list-complete-item {
-      padding: 4px;
-      margin-top: 4px;
-      border: solid 1px;
-      height: 60px;
-    }
-    .list-complete-enter-active {
-      overflow: hidden;
-      transition: all 1s;
-    }
-    .list-complete-leave-active {
-      margin-top: 0px;
-      overflow: hidden;
-      transition: all 1s;
-    }
-    .list-complete-enter, .list-complete-leave-to {
-      height: 0px;
-      opacity: 0;
-      padding: 0px;
-      margin-top: 0px;
-      overflow: hidden;
-    }
-
-
     .tabs ul{
         flex-direction: column;
         border-bottom-width: 0px;
@@ -110,11 +86,12 @@
                     </div>
                     <div class="dropdown-menu" id="dropdown-menu" role="menu">
                         <div class="dropdown-content">
-                            <a href="#" class="dropdown-item" v-for="item in actions.data" @click="chooseModule(item.module)">{{ item.desc }}</a>
+                            <a href="#" class="dropdown-item" v-for="(item, key) in actions.data" @click="chooseModule(key)">{{ item.desc }}</a>
                         </div>
                     </div>
                 </div>
-                <button class="button" @click="openAll">{{ actions.collapse_all ? "展开全部":"折叠全部" }}</button>
+                <button class="button is-primary" @click="openAll">{{ actions.collapse_all ? "展开全部":"折叠全部" }}</button>
+                <button class="button is-danger">删除页面</button>
             </div>
         </div>
     </template>
@@ -128,10 +105,13 @@
                 </p>
                 <span class="card-header-icon" aria-label="more options">
                     <span class="icon" @click="info.state.collapse = !info.state.collapse" v-show="!info.state.collapse">
-                        <i class="fa fa-angle-up" aria-hidden="true"></i>
+                        <i class="fa fa-envelope-open" aria-hidden="true"></i>
                     </span>
                     <span class="icon" @click="info.state.collapse = !info.state.collapse" v-show="info.state.collapse">
-                        <i class="fa fa-angle-down" aria-hidden="true"></i>
+                        <i class="fa fa-envelope" aria-hidden="true"></i>
+                    </span>
+                    <span class="icon" title="删除模块,危险">
+                        <i class="fa fa-times" aria-hidden="true"></i>
                     </span>
                 </span>
             </header>
@@ -140,7 +120,7 @@
                     <div class="column is-two-fifths">
                         <div class="field is-horizontal">
                             <div class="field-label is-normal">
-                                <label class="label">标题文案</label>
+                                <label class="label">文案</label>
                             </div>
                             <div class="field-body">
                                 <div class="field">
@@ -154,7 +134,7 @@
                     <div class="column is-two-fifths">
                         <div class="field is-horizontal">
                             <div class="field-label is-normal">
-                                <label class="label">跳转地址</label>
+                                <label class="label">地址</label>
                             </div>
                             <div class="field-body">
                                 <div class="field">
@@ -175,22 +155,27 @@
         <div class="container">
             <div class="columns">
                 <div class="column is-one-fifth">
-                    <v-tabs :items="page_tabs.items" :active="page_tabs.active"></v-tabs>
+                    <div style="text-align: center;margin-bottom: 10px;">
+                        <button class="button is-white" @click="addTab">添加页签</button>
+                    </div>
+                    <v-tabs :items="page_data" :active="page_state.active"></v-tabs>
                 </div>
                 <div class="column is-four-fifths">
 
                     <v-act :actions="page_action"></v-act>
 
-                    <draggable v-model="page_modules" :options="{animation:150}" :no-transition-on-drag="true" @start="drag=true" @end="drag=false">
-                        <transition-group :name="!drag? 'list-complete' : null" :css="true">
-                            <component 
+                    <h4 class="subtitle is-5">页签信息</h4>
+
+                    <h4 class="subtitle is-5">模块列表</h4>
+
+                    <draggable v-model="page_data[page_state.active].modules" :options="{animation:150}" :no-transition-on-drag="true" @start="drag=true" @end="drag=false">
+                        <component 
                                 :info="module" 
-                                v-for="(module, index) in page_modules" 
+                                v-for="(module, index) in page_data[page_state.active].modules" 
                                 :is="module.module_type" 
                                 :key="module.id"
                                 >    
-                            </component>
-                        </transition-group>
+                        </component>
                     </draggable>
                 </div>
             </div>
@@ -198,91 +183,96 @@
     </section>
 
     <script type="text/javascript">
-    var tpl = {
-        "basic_module": {
-            "id": null,
-            "module_type": "v-module-basic",
-            "data": {
-                "title": "基础模块",
-                "url": "http://www.baidu.com",
-            },
-            "state": {
-                "collapse": false
-            }
-        }
-    };
-
     var store = {
         state: {
             "drag": false,
-            "basic_info": {},
-            "page_tabs": {
+
+            // 页面基础信息
+            "page_info": {},
+
+            // 页面按钮状态等
+            "page_state": {
                 "active": 0,
-                "items": [
-                    {
-                        "title": "第一集"
-                    },
-                    {
-                        "title": "第二集"
-                    },
-                    {
-                        "title": "第三集"
-                    },
-                    {
-                        "title": "第四集"
-                    },
-                    {
-                        "title": "第五集"
-                    },
-                    {
-                        "title": "第六集"
-                    },
-                    {
-                        "title": "第七集"
-                    },
-                    {
-                        "title": "第八集"
-                    },
-                    {
-                        "title": "第九集"
-                    }
-                ]
             },
+
+            // 整个页面的数据结构
+            "page_data": [
+                {
+                    "title": "第一集",
+                    "modules": [
+                        {
+                            "id": 1,
+                            "module_type": "v-module-basic",
+                            "data": {
+                                "title": "基础模块",
+                                "url": "http://www.baidu.com",
+                            },
+                            "state": {
+                                "collapse": false
+                            }
+                        }
+                    ]
+                },
+                {
+                    "title": "第二集",
+                    "modules": []
+                },
+                {
+                    "title": "第三集",
+                    "modules": []
+                },
+                {
+                    "title": "第四集",
+                    "modules": []
+                },
+                {
+                    "title": "第五集",
+                    "modules": []
+                },
+                {
+                    "title": "第六集",
+                    "modules": []
+                },
+                {
+                    "title": "第七集",
+                    "modules": []
+                },
+                {
+                    "title": "第八集",
+                    "modules": []
+                },
+                {
+                    "title": "第九集",
+                    "modules": []
+                }
+            ],
+
+            // 页面的备份数据，误操作，还原用的
+            "page_bak": null,
+
+            // 页面动作
             "page_action": {
                 "open": false,
-                "data": [
-                    {
-                        "module": "basic_module",
-                        "desc": "基础信息模块"
-                    },
-                    {
-                        "module": "bussiness",
-                        "desc": "双图商业化模块"
-                    },
-                    {
-                        "module": "userlist",
-                        "desc": "用户列表模块"
+                "data": {
+                    "basic_module": {
+                        "id": null,
+                        "module_type": "v-module-basic",
+                        "desc": "基础信息模块",
+                        "data": {
+                            "title": "基础模块",
+                            "url": "http://www.baidu.com",
+                        },
+                        "state": {
+                            "collapse": false
+                        }
                     }
-                ],
+                },
                 "collapse_all": false
-            },
-            "page_modules": [
-                {
-                    "id": 1,
-                    "module_type": "v-module-basic",
-                    "data": {
-                        "title": "基础模块",
-                        "url": "http://www.baidu.com",
-                    },
-                    "state": {
-                        "collapse": false
-                    }
-                }
-            ]
+            }
         },
 
         switchTab: function(idx) {
-            this.state.page_tabs.active = idx;
+            this.state.page_state.active = idx;
         },
 
         switchDropdown: function (st) {
@@ -291,19 +281,34 @@
 
         openAll: function () {
             var i = 0;
-            this.state.page_action.collapse_all = !this.state.page_action.collapse_all;
-            for (;i<this.state.page_modules.length;i++) {
-                this.state.page_modules[i].state.collapse = this.state.page_action.collapse_all;
+            var st = this.state;
+            st.page_action.collapse_all = !st.page_action.collapse_all;
+            for (;i<st.page_data[st.page_state.active].modules.length;i++) {
+                st.page_data[st.page_state.active].modules[i].state.collapse = st.page_action.collapse_all;
             }
         },
 
+        addTab: function () {
+            this.state.page_data.unshift({
+                "title": "默认文案",
+                "modules": []
+            });
+            this.switchTab(0);
+        },
+
         addModule: function (module) {
-            if (tpl[module]) {
-                var obj = JSON.parse(JSON.stringify(tpl[module]));
-                obj["id"] = this.state.page_modules + 1;
-                this.state.page_modules.push(obj);
+            var st = this.state;
+            if (st.page_action["data"][module]) {
+                var obj = JSON.parse(JSON.stringify(st.page_action["data"][module]));
+                obj["id"] = st.page_data[st.page_state.active].modules.length + 1;
+                st.page_data[st.page_state.active].modules.push(obj);
             }
-            this.state.drag = false;
+            st.drag = false;
+        },
+
+        sortPage: function (oldPage, newPage) {
+            this.state.page_data = newPage;
+            this.state.page_bak = oldPage;
         }
 
     };
@@ -324,6 +329,8 @@
                 if (this.active == evt.oldIndex) {
                     store.switchTab(evt.newIndex);
                 }
+
+                store.sortPage(this.items, this.proxy_items);
             }
         }
     });
@@ -357,7 +364,12 @@
 
     var vm = new Vue({
         el: "#app",
-        data: store.state
+        data: store.state,
+        methods: {
+            addTab: function () {
+                store.addTab();
+            }
+        }
     });
     </script>
 </body>
