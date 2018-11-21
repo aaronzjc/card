@@ -91,7 +91,7 @@
                     </div>
                 </div>
                 <button class="button is-primary" @click="openAll">{{ actions.collapse_all ? "展开全部":"折叠全部" }}</button>
-                <button class="button is-danger">删除页面</button>
+                <button class="button is-danger" @click="deleteTab">删除页签</button>
             </div>
         </div>
     </template>
@@ -350,6 +350,10 @@
             },
             openAll: function () {
                 store.openAll();
+            },
+            deleteTab: function () {
+                // TODO
+                confirm("删除页签，会删除此页签的所有配置。确定继续？");
             }
         }
     });
