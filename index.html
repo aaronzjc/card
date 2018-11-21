@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
     <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
-    <script type="text/javascript" src="https://vuejs.org/js/vue.js"></script>
+    <script src="https://cdn.bootcss.com/vue/2.5.16/vue.js"></script>
     
     <script src="http://cdn.jsdelivr.net/npm/sortablejs@1.7.0/Sortable.min.js"></script>
     <!-- CDNJS :: Vue.Draggable (https://cdnjs.com/) -->
@@ -27,11 +27,16 @@
         cursor: move;
     }
 
+    .card-header.expired, .card-header.expired p{
+        color: #f03;
+    }
+
     .tabs ul{
         flex-direction: column;
         border-bottom-width: 0px;
     }
     .tabs ul li {
+        position: relative;
         width: 100%;
     }
     .tabs a {
@@ -45,6 +50,10 @@
         border: 1px solid #dadada;
         border-right-width: 0px;
         border-radius: 4px 0px 0px 4px;
+    }
+
+    .tabs ul li.expired a {
+        color: #f04;
     }
     </style>
 </head>
@@ -62,7 +71,7 @@
                     @end="onEnd" >
                     <li 
                         v-for="(item, index) in proxy_items" 
-                        :class="{ 'is-active': index == active }"
+                        :class="[ {'is-active': index == active }, {'expired': !item.enabled} ]"
                         @click="switchTab(index)" >
                         <a>{{ item.title }}</a>
                     </li>
@@ -92,6 +101,7 @@
                 </div>
                 <button class="button is-primary" @click="openAll">{{ actions.collapse_all ? "展开全部":"折叠全部" }}</button>
                 <button class="button is-danger" @click="deleteTab">删除页签</button>
+                <button class="button is-warning" @click="saveConfig">保存配置</button>
             </div>
         </div>
     </template>
@@ -99,7 +109,7 @@
     <!-- 基础信息模块 -->
     <template id="VModuleBasic">
         <div class="card">
-            <header class="card-header">
+            <header class="card-header" :class="{ 'expired': !info.enabled }">
                 <p class="card-header-title">
                     {{ info.data.title }}
                 </p>
@@ -166,6 +176,39 @@
 
                     <h4 class="subtitle is-5">页签信息</h4>
 
+                    <div class="columns">
+                        <div class="column is-two-fifths">
+                            <div class="field is-horizontal">
+                                <div class="field-label is-normal">
+                                    <label class="label">页签标题</label>
+                                </div>
+                                <div class="field-body">
+                                    <div class="field">
+                                        <div class="control">
+                                            <input class="input" type="email" v-model="page_data[page_state.active].title" placeholder="标题文案">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column is-two-fifths">
+                            <div class="field is-horizontal">
+                                <div class="field-label is-normal">
+                                    <label class="label">是否启用</label>
+                                </div>
+                                <div class="field-body">
+                                    <div class="field">
+                                        <div class="control">
+                                            <label class="checkbox">
+                                                <input type="checkbox" v-model="page_data[page_state.active].enabled">
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <h4 class="subtitle is-5">模块列表</h4>
 
                     <draggable v-model="page_data[page_state.active].modules" :options="{animation:150}" :no-transition-on-drag="true" @start="drag=true" @end="drag=false">
@@ -199,10 +242,12 @@
             "page_data": [
                 {
                     "title": "第一集",
+                    "enabled": true,
                     "modules": [
                         {
                             "id": 1,
                             "module_type": "v-module-basic",
+                            "enabled": false,
                             "data": {
                                 "title": "基础模块",
                                 "url": "http://www.baidu.com",
@@ -215,34 +260,42 @@
                 },
                 {
                     "title": "第二集",
+                    "enabled": true,
                     "modules": []
                 },
                 {
                     "title": "第三集",
+                    "enabled": true,
                     "modules": []
                 },
                 {
                     "title": "第四集",
+                    "enabled": false,
                     "modules": []
                 },
                 {
                     "title": "第五集",
+                    "enabled": true,
                     "modules": []
                 },
                 {
                     "title": "第六集",
+                    "enabled": true,
                     "modules": []
                 },
                 {
                     "title": "第七集",
+                    "enabled": true,
                     "modules": []
                 },
                 {
                     "title": "第八集",
+                    "enabled": true,
                     "modules": []
                 },
                 {
                     "title": "第九集",
+                    "enabled": true,
                     "modules": []
                 }
             ],
@@ -258,6 +311,7 @@
                         "id": null,
                         "module_type": "v-module-basic",
                         "desc": "基础信息模块",
+                        "enabled": true,
                         "data": {
                             "title": "基础模块",
                             "url": "http://www.baidu.com",
@@ -291,6 +345,7 @@
         addTab: function () {
             this.state.page_data.unshift({
                 "title": "默认文案",
+                "enabled": false,
                 "modules": []
             });
             this.switchTab(0);
@@ -309,6 +364,15 @@
         sortPage: function (oldPage, newPage) {
             this.state.page_data = newPage;
             this.state.page_bak = oldPage;
+        },
+
+        deleteTab: function () {
+            this.state.page_data.splice(this.state.page_state.active, 1);
+            this.switchTab(0)
+        },
+
+        saveConfig: function () {
+            console.log(this.state.page_data);
         }
 
     };
@@ -353,7 +417,12 @@
             },
             deleteTab: function () {
                 // TODO
-                confirm("删除页签，会删除此页签的所有配置。确定继续？");
+                if (confirm("删除页签，会删除此页签的所有配置。确定继续？")) {
+                    store.deleteTab();
+                }
+            },
+            saveConfig: function () {
+                store.saveConfig();
             }
         }
     });
