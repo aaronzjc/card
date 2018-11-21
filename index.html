@@ -16,7 +16,6 @@
     <title>测试</title>
 
     <style type="text/css">
-
     .container {
         margin-top: 2rem;
     }
@@ -28,26 +27,21 @@
         cursor: move;
     }
 
-
-
     .list-complete-item {
       padding: 4px;
       margin-top: 4px;
       border: solid 1px;
       height: 60px;
     }
-
     .list-complete-enter-active {
       overflow: hidden;
       transition: all 1s;
     }
-
     .list-complete-leave-active {
       margin-top: 0px;
       overflow: hidden;
       transition: all 1s;
     }
-
     .list-complete-enter, .list-complete-leave-to {
       height: 0px;
       opacity: 0;
@@ -226,13 +220,31 @@
                 "active": 0,
                 "items": [
                     {
-                        "title": "第一页"
+                        "title": "第一集"
                     },
                     {
-                        "title": "第二页"
+                        "title": "第二集"
                     },
                     {
-                        "title": "第三页"
+                        "title": "第三集"
+                    },
+                    {
+                        "title": "第四集"
+                    },
+                    {
+                        "title": "第五集"
+                    },
+                    {
+                        "title": "第六集"
+                    },
+                    {
+                        "title": "第七集"
+                    },
+                    {
+                        "title": "第八集"
+                    },
+                    {
+                        "title": "第九集"
                     }
                 ]
             },
@@ -309,7 +321,6 @@
                 store.switchTab(idx);
             },
             onEnd: function (evt) {
-                console.log(evt);
                 if (this.active == evt.oldIndex) {
                     store.switchTab(evt.newIndex);
                 }
