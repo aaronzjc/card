@@ -14,9 +14,67 @@
     <script src="http://cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.15.0/vuedraggable.min.js"></script>
 
     <title>测试</title>
+
     <style type="text/css">
+
+    .container {
+        margin-top: 2rem;
+    }
+
     .card {
         margin: 10px 0px;
+    }
+    .card-header:hover {
+        cursor: move;
+    }
+
+
+
+    .list-complete-item {
+      padding: 4px;
+      margin-top: 4px;
+      border: solid 1px;
+      height: 60px;
+    }
+
+    .list-complete-enter-active {
+      overflow: hidden;
+      transition: all 1s;
+    }
+
+    .list-complete-leave-active {
+      margin-top: 0px;
+      overflow: hidden;
+      transition: all 1s;
+    }
+
+    .list-complete-enter, .list-complete-leave-to {
+      height: 0px;
+      opacity: 0;
+      padding: 0px;
+      margin-top: 0px;
+      overflow: hidden;
+    }
+
+
+    .tabs ul{
+        flex-direction: column;
+        border-bottom-width: 0px;
+    }
+    .tabs ul li {
+        width: 100%;
+    }
+    .tabs a {
+        margin-bottom: 0px;
+    }
+    .tabs ul li a {
+        border-bottom-width: 0px;
+        border-right: 1px solid #dadada;
+    }
+    .tabs ul li.is-active a {
+        border: 1px solid #dadada;
+        border-right-width: 0px;
+        border-radius: 4px 0px 0px 4px;
     }
     </style>
 </head>
@@ -26,13 +84,19 @@
     <template id="VTabs">
         <div class="tabs">
             <ul>
-                <li 
-                    v-for="(item, index) in items" 
-                    :class="{ 'is-active': index == active }"
-                    @click="switchTab(index)" >
-                    <a>{{ item }}</a>
-                </li>
-                <li><a class="button is-primary">添加</a></li>
+                <draggable 
+                    v-model="proxy_items" 
+                    :options="{animation:150}" 
+                    element="li" 
+                    :no-transition-on-drag="true"
+                    @end="onEnd" >
+                    <li 
+                        v-for="(item, index) in proxy_items" 
+                        :class="{ 'is-active': index == active }"
+                        @click="switchTab(index)" >
+                        <a>{{ item.title }}</a>
+                    </li>
+                </draggable>
             </ul>
         </div>
     </template>
@@ -52,15 +116,7 @@
                     </div>
                     <div class="dropdown-menu" id="dropdown-menu" role="menu">
                         <div class="dropdown-content">
-                            <a href="#" class="dropdown-item" @click="chooseModule('basic_module')">
-                            基础信息模块
-                            </a>
-                            <a class="dropdown-item" @click="chooseModule('bussiness')">
-                            双图商业化模块
-                            </a>
-                            <a href="#" class="dropdown-item" @click="chooseModule('userlist')">
-                            用户列表模块
-                            </a>
+                            <a href="#" class="dropdown-item" v-for="item in actions.data" @click="chooseModule(item.module)">{{ item.desc }}</a>
                         </div>
                     </div>
                 </div>
@@ -76,14 +132,14 @@
                 <p class="card-header-title">
                     {{ info.data.title }}
                 </p>
-                <a href="#" class="card-header-icon" aria-label="more options">
+                <span class="card-header-icon" aria-label="more options">
                     <span class="icon" @click="info.state.collapse = !info.state.collapse" v-show="!info.state.collapse">
-                        <i class="fa fa-angle-down" aria-hidden="true"></i>
-                    </span>
-                    <span class="icon" @click="info.state.collapse = !info.state.collapse" v-show="info.state.collapse">
                         <i class="fa fa-angle-up" aria-hidden="true"></i>
                     </span>
-                </a>
+                    <span class="icon" @click="info.state.collapse = !info.state.collapse" v-show="info.state.collapse">
+                        <i class="fa fa-angle-down" aria-hidden="true"></i>
+                    </span>
+                </span>
             </header>
             <div class="card-content" v-show="!info.state.collapse">
                 <div class="columns">
@@ -123,19 +179,27 @@
     <section id="app">
 
         <div class="container">
-            <v-tabs :items="page_tabs.items" :active="page_tabs.active"></v-tabs>
+            <div class="columns">
+                <div class="column is-one-fifth">
+                    <v-tabs :items="page_tabs.items" :active="page_tabs.active"></v-tabs>
+                </div>
+                <div class="column is-four-fifths">
 
-            <v-act :actions="page_action"></v-act>
+                    <v-act :actions="page_action"></v-act>
 
-            <draggable v-model="page_modules" :options="{group:'mms'}" @start="drag=true" @end="drag=false">
-                <component 
-                    :info="module" 
-                    v-for="(module, index) in page_modules" 
-                    :is="module.module_type" 
-                    :key="module.id"
-                    >    
-                </component>
-            </draggable>
+                    <draggable v-model="page_modules" :options="{animation:150}" :no-transition-on-drag="true" @start="drag=true" @end="drag=false">
+                        <transition-group :name="!drag? 'list-complete' : null" :css="true">
+                            <component 
+                                :info="module" 
+                                v-for="(module, index) in page_modules" 
+                                :is="module.module_type" 
+                                :key="module.id"
+                                >    
+                            </component>
+                        </transition-group>
+                    </draggable>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -156,13 +220,38 @@
 
     var store = {
         state: {
+            "drag": false,
             "basic_info": {},
             "page_tabs": {
                 "active": 0,
-                "items": ["第一页", "第二页", "第三页"]
+                "items": [
+                    {
+                        "title": "第一页"
+                    },
+                    {
+                        "title": "第二页"
+                    },
+                    {
+                        "title": "第三页"
+                    }
+                ]
             },
             "page_action": {
                 "open": false,
+                "data": [
+                    {
+                        "module": "basic_module",
+                        "desc": "基础信息模块"
+                    },
+                    {
+                        "module": "bussiness",
+                        "desc": "双图商业化模块"
+                    },
+                    {
+                        "module": "userlist",
+                        "desc": "用户列表模块"
+                    }
+                ],
                 "collapse_all": false
             },
             "page_modules": [
@@ -202,6 +291,7 @@
                 obj["id"] = this.state.page_modules + 1;
                 this.state.page_modules.push(obj);
             }
+            this.state.drag = false;
         }
 
     };
@@ -209,9 +299,20 @@
     Vue.component("v-tabs", {
         template: "#VTabs",
         props: ["items", "active"],
+        data: function () {
+            return {
+                "proxy_items": this.items
+            }
+        },
         methods: {
             switchTab: function (idx) {
                 store.switchTab(idx);
+            },
+            onEnd: function (evt) {
+                console.log(evt);
+                if (this.active == evt.oldIndex) {
+                    store.switchTab(evt.newIndex);
+                }
             }
         }
     });
@@ -221,7 +322,7 @@
         props: ["actions"],
         methods: {
             switchDropdown: function () {
-                store.switchDropdown(!this.open);
+                store.switchDropdown(!this.actions.open);
             },
             chooseModule: function (module) {
                 console.log(module);
