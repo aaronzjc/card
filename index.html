@@ -11,6 +11,8 @@
     <script src="http://cdn.jsdelivr.net/npm/sortablejs@1.7.0/Sortable.min.js"></script>
     <!-- CDNJS :: Vue.Draggable (https://cdnjs.com/) -->
     <script src="http://cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.15.0/vuedraggable.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
     <title>测试</title>
     <style type="text/css">
     .container {
@@ -201,6 +203,7 @@
             // 整个页面的数据结构
             "page_data": [
                 {
+                    "id": 1,
                     "title": "第一集",
                     "enabled": true,
                     "modules": [{
@@ -218,41 +221,49 @@
                     }]
                 },
                 {
+                    "id": 2,
                     "title": "第二集",
                     "enabled": true,
                     "modules": []
                 },
                 {
+                    "id": 3,
                     "title": "第三集",
                     "enabled": true,
                     "modules": []
                 },
                 {
+                    "id": 4,
                     "title": "第四集",
                     "enabled": false,
                     "modules": []
                 },
                 {
+                    "id": 5,
                     "title": "第五集",
                     "enabled": true,
                     "modules": []
                 },
                 {
+                    "id": 6,
                     "title": "第六集",
                     "enabled": true,
                     "modules": []
                 },
                 {
+                    "id": 7,
                     "title": "第七集",
                     "enabled": true,
                     "modules": []
                 },
                 {
+                    "id": 8,
                     "title": "第八集",
                     "enabled": true,
                     "modules": []
                 },
                 {
+                    "id": 9,
                     "title": "第九集",
                     "enabled": true,
                     "modules": []
@@ -308,6 +319,7 @@
         // 添加Tab页
         addTab: function() {
             this.state.page_data.unshift({
+                "id": null,
                 "title": "默认文案",
                 "enabled": false,
                 "modules": []
@@ -349,9 +361,16 @@
             this.switchTab(0)
         },
 
-        // 保存配置
+        // 保存当前页签配置
         saveConfig: function() {
-            console.log(this.state.page_data);
+            var cnf = this.state.page_data[this.state.page_state.active];
+            axios.post("/module/" + cnf.id, {
+                config: cnf
+            }).then(function (response) {
+                console.log(response)
+            }).catch(function (error) {
+
+            });
         }
 
     };
