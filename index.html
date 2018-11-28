@@ -93,7 +93,7 @@
                         </div>
                     </div>
                 </div>
-                <button class="button is-primary" @click="openAll">{{ actions.collapse_all ? "展开全部":"折叠全部" }}</button>
+                <button class="button is-primary" @click="toggleAll">{{ actions.collapse_all ? "展开全部":"折叠全部" }}</button>
                 <button class="button is-danger" @click="deleteTab">删除页签</button>
                 <button class="button is-warning" @click="saveConfig">保存配置</button>
             </div>
@@ -178,7 +178,7 @@
                     <v-tab-info :info="page_data[page_state.active]"></v-tab-info>
                     <h4 class="subtitle is-5">模块列表</h4>
                     <draggable v-model="page_data[page_state.active].modules" :options="{animation:150,handle:'.dragger'}" :no-transition-on-drag="true" @start="drag=true" @end="drag=false">
-                        <component :info="module" :idx="index" v-for="(module, index) in page_data[page_state.active].modules" :is="module.module_type" :key="module.id">
+                        <component :info="module" :idx="index" v-for="(module, index) in page_data[page_state.active].modules" :is="module.module_type" :key="module.key">
                         </component>
                     </draggable>
                 </div>
@@ -199,11 +199,13 @@
             },
 
             // 整个页面的数据结构
-            "page_data": [{
+            "page_data": [
+                {
                     "title": "第一集",
                     "enabled": true,
                     "modules": [{
                         "id": 1,
+                        "key": 1,
                         "module_type": "v-module-basic",
                         "enabled": false,
                         "data": {
@@ -266,6 +268,7 @@
                 "data": {
                     "basic_module": {
                         "id": null,
+                        "key": null,
                         "module_type": "v-module-basic",
                         "desc": "基础信息模块",
                         "enabled": true,
@@ -282,15 +285,18 @@
             }
         },
 
+        // 切换Tab展示
         switchTab: function(idx) {
             this.state.page_state.active = idx;
         },
 
+        // 下拉菜单的展示
         switchDropdown: function(st) {
             this.state.page_action.open = st;
         },
 
-        openAll: function() {
+        // 展开/折叠全部
+        toggleAll: function() {
             var i = 0;
             var st = this.state;
             st.page_action.collapse_all = !st.page_action.collapse_all;
@@ -299,6 +305,7 @@
             }
         },
 
+        // 添加Tab页
         addTab: function() {
             this.state.page_data.unshift({
                 "title": "默认文案",
@@ -308,35 +315,41 @@
             this.switchTab(0);
         },
 
+        // 添加一个模块
         addModule: function(module) {
             var st = this.state;
             if (st.page_action["data"][module]) {
                 var obj = JSON.parse(JSON.stringify(st.page_action["data"][module]));
-                obj["id"] = st.page_data[st.page_state.active].modules.length + 1;
+                obj["key"] = st.page_data[st.page_state.active].modules.length + 1;
                 st.page_data[st.page_state.active].modules.push(obj);
             }
             st.drag = false;
         },
 
+        // 删除一个模块
         deleteModule: function(idx) {
             this.state.page_data[this.state.page_state.active].modules.splice(idx, 1);
         },
 
+        // 重新排序Tab顺序
         sortPage: function(oldPage, newPage) {
             this.state.page_data = newPage;
             this.state.page_bak = oldPage;
         },
 
+        // 切换Tab的状态
         changeTabState: function() {
             var oldSt = this.state.page_data[this.state.page_state.active].enabled;
             this.state.page_data[this.state.page_state.active].enabled = !oldSt;
         },
 
+        // 删除Tab
         deleteTab: function() {
             this.state.page_data.splice(this.state.page_state.active, 1);
             this.switchTab(0)
         },
 
+        // 保存配置
         saveConfig: function() {
             console.log(this.state.page_data);
         }
@@ -388,8 +401,8 @@
                 store.addModule(module);
 
             },
-            openAll: function() {
-                store.openAll();
+            toggleAll: function() {
+                store.toggleAll();
             },
             deleteTab: function() {
                 if (confirm("删除页签，会删除此页签的所有配置。确定继续？")) {
