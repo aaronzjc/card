@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
+    <link rel="stylesheet" type="text/css" href="css/checkbox.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
+    <script src="https://cdn.bootcss.com/vue/2.5.16/vue.js"></script>
+    <script src="js/store.js"></script>
+    <script src="js/components.js"></script>
+    
+    <script src="http://cdn.jsdelivr.net/npm/sortablejs@1.7.0/Sortable.min.js"></script>
+    <!-- CDNJS :: Vue.Draggable (https://cdnjs.com/) -->
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.15.0/vuedraggable.min.js"></script>
+
+    <title>测试</title>
+
+    <style type="text/css">
+    .container {
+        margin-top: 2rem;
+    }
+
+    .card {
+        margin: 10px 0px;
+    }
+    .card-header:hover {
+        cursor: move;
+    }
+
+    .card-header.expired, .card-header.expired p{
+        color: #f03;
+    }
+
+    .tabs ul{
+        flex-direction: column;
+        border-bottom-width: 0px;
+    }
+    .tabs ul li {
+        position: relative;
+        width: 100%;
+    }
+    .tabs a {
+        margin-bottom: 0px;
+    }
+    .tabs ul li a {
+        border-bottom-width: 0px;
+        border-right: 1px solid #dadada;
+    }
+    .tabs ul li.is-active a {
+        border: 1px solid #dadada;
+        border-right-width: 0px;
+        border-radius: 4px 0px 0px 4px;
+    }
+
+    .tabs ul li.expired a {
+        color: #f04;
+    }
+    </style>
+</head>
+
+<body>
+    <section id="app">
+
+        <div class="container">
+            <div class="columns">
+                <div class="column is-one-fifth">
+                    <div style="text-align: center;margin-bottom: 10px;">
+                        <button class="button is-white" @click="addTab">添加页签</button>
+                    </div>
+                    <v-tabs :items="page_data" :active="page_state.active"></v-tabs>
+                </div>
+                <div class="column is-four-fifths">
+
+                    <v-act :actions="page_action"></v-act>
+
+                    <h4 class="subtitle is-5">页签信息</h4>
+
+                    <div class="columns">
+                        <div class="column is-two-fifths">
+                            <div class="field is-horizontal">
+                                <div class="field-label">
+                                    <label class="label">标题</label>
+                                </div>
+                                <div class="field-body">
+                                    <div class="field">
+                                        <div class="control">
+                                            <input class="input" type="email" v-model="page_data[page_state.active].title" placeholder="标题文案">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column is-two-fifths">
+                            <div class="field is-horizontal">
+                                <div class="field-label">
+                                    <label class="label">状态</label>
+                                </div>
+                                <div class="field-body">
+                                    <div class="field">
+                                      <input class="is-checkradio is-block" type="checkbox" v-model="page_data[page_state.active].enabled">
+                                      <label>已启用</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="subtitle is-5">模块列表</h4>
+
+                    <draggable v-model="page_data[page_state.active].modules" :options="{animation:150}" :no-transition-on-drag="true" @start="drag=true" @end="drag=false">
+                        <component 
+                                :info="module" 
+                                v-for="(module, index) in page_data[page_state.active].modules" 
+                                :is="module.module_type" 
+                                :key="module.id"
+                                >    
+                        </component>
+                    </draggable>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script type="text/javascript">
+
+    var vm = new Vue({
+        el: "#app",
+        data: store.state,
+        methods: {
+            addTab: function () {
+                store.addTab();
+            }
+        }
+    });
+    </script>
+</body>
+
+</html>

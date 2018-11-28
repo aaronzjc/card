@@ -11,6 +11,7 @@
     <script src="https://cdn.bootcss.com/vue/2.5.16/vue.js"></script>
     
     <script src="http://cdn.jsdelivr.net/npm/sortablejs@1.7.0/Sortable.min.js"></script>
+
     <!-- CDNJS :: Vue.Draggable (https://cdnjs.com/) -->
     <script src="http://cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.15.0/vuedraggable.min.js"></script>
 
@@ -196,7 +197,12 @@
 
                     <h4 class="subtitle is-5">模块列表</h4>
 
-                    <draggable v-model="page_data[page_state.active].modules" :options="{animation:150}" :no-transition-on-drag="true" @start="drag=true" @end="drag=false">
+                    <draggable 
+                        v-model="page_data[page_state.active].modules" 
+                        :options="{animation:150,handle:'.card-header-title'}" 
+                        :no-transition-on-drag="true" 
+                        @start="drag=true" 
+                        @end="drag=false">
                         <component 
                                 :info="module"
                                 :idx="index"
